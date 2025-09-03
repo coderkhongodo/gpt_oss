@@ -4,12 +4,6 @@ gpt-oss-20b-qlora-finetune-v2/
 *.bin
 checkpoint-*/
 
-# Data files
-jsonl_text/
-*.jsonl
-*.csv
-*.json
-
 # Python cache
 __pycache__/
 *.py[cod]
