@@ -24,7 +24,7 @@ Recommended env for ~48GB VRAM (QLoRA 4-bit, paged AdamW 8-bit, packing):
 
 ```bash
 # Windows PowerShell examples
-$env:DATA_DIR = "jsonl_text"
+$env:DATA_DIR = "/root/gpt_oss/jsonl_text"
 $env:OUTPUT_DIR = "gpt-oss-20b-qlora-finetune"
 $env:BATCH_SIZE = "1"
 $env:EVAL_BATCH_SIZE = "1"

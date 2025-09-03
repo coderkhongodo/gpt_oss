@@ -1,0 +1,76 @@
+# Model files and checkpoints
+gpt-oss-20b-qlora-finetune-v2/
+*.safetensors
+*.bin
+checkpoint-*/
+
+# Data files
+jsonl_text/
+*.jsonl
+*.csv
+*.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Hugging Face cache
+.cache/
+transformers_cache/
+
+# Results and outputs
+results/
+outputs/
+my_results.csv
+evaluation_summary.json
