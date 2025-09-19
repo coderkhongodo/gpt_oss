@@ -96,21 +96,41 @@ def evaluate_model():
     Đánh giá model
     """
     logger.info("Evaluating model...")
-    
+
     if not os.path.exists("inference_phobert.py"):
         logger.error("inference_phobert.py not found!")
         return False
-    
+
     if not run_command("python inference_phobert.py --mode evaluate", "Evaluating model"):
         return False
-    
+
     logger.info("✓ Model evaluation completed")
+    return True
+
+def create_evaluation_report():
+    """
+    Tạo báo cáo đánh giá chi tiết với biểu đồ
+    """
+    logger.info("Creating detailed evaluation report...")
+
+    if not os.path.exists("create_evaluation_report.py"):
+        logger.error("create_evaluation_report.py not found!")
+        return False
+
+    if not os.path.exists("evaluation_results/evaluation_summary.json"):
+        logger.error("Evaluation results not found! Please run evaluation first.")
+        return False
+
+    if not run_command("python create_evaluation_report.py", "Creating evaluation report"):
+        return False
+
+    logger.info("✓ Detailed evaluation report created")
     return True
 
 def main():
     parser = argparse.ArgumentParser(description='PhoBERT Fake News Detection Pipeline')
-    parser.add_argument('--steps', type=str, nargs='+', 
-                       choices=['requirements', 'data', 'train', 'evaluate', 'all'],
+    parser.add_argument('--steps', type=str, nargs='+',
+                       choices=['requirements', 'data', 'train', 'evaluate', 'report', 'all'],
                        default=['all'],
                        help='Steps to run (default: all)')
     parser.add_argument('--skip-requirements', action='store_true',
@@ -120,7 +140,7 @@ def main():
     
     steps = args.steps
     if 'all' in steps:
-        steps = ['requirements', 'data', 'train', 'evaluate']
+        steps = ['requirements', 'data', 'train', 'evaluate', 'report']
     
     if args.skip_requirements and 'requirements' in steps:
         steps.remove('requirements')
@@ -146,13 +166,18 @@ def main():
     if success and 'evaluate' in steps:
         if not evaluate_model():
             success = False
-    
+
+    if success and 'report' in steps:
+        if not create_evaluation_report():
+            success = False
+
     if success:
         logger.info("🎉 Pipeline completed successfully!")
         logger.info("\nNext steps:")
         logger.info("1. Check evaluation results in 'evaluation_results/' directory")
-        logger.info("2. Run demo: python inference_phobert.py --mode demo")
-        logger.info("3. Use the trained model in 'phobert-fake-news-detector/' directory")
+        logger.info("2. Open 'evaluation_results/evaluation_report.html' for detailed analysis")
+        logger.info("3. Run demo: python inference_phobert.py --mode demo")
+        logger.info("4. Use the trained model in 'phobert-fake-news-detector/' directory")
     else:
         logger.error("❌ Pipeline failed!")
         sys.exit(1)

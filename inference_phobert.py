@@ -17,7 +17,7 @@ class PhoBERTFakeNewsDetector:
     """
     Class để thực hiện inference với PhoBERT đã fine-tune
     """
-    def __init__(self, model_path, max_length=512):
+    def __init__(self, model_path, max_length=256):
         self.model_path = model_path
         self.max_length = max_length
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -134,16 +134,26 @@ def evaluate_model(model_path, test_data_path, output_dir="evaluation_results"):
     predicted_labels = [pred['predicted_label'] for pred in predictions]
     true_labels = test_df['label'].tolist()
     
-    # Tính toán metrics
+    # Tính toán metrics tổng thể
     accuracy = accuracy_score(true_labels, predicted_labels)
-    precision, recall, f1, _ = precision_recall_fscore_support(
+
+    # Metrics weighted và macro
+    precision_weighted, recall_weighted, f1_weighted, _ = precision_recall_fscore_support(
         true_labels, predicted_labels, average='weighted'
     )
-    
+    precision_macro, recall_macro, f1_macro, _ = precision_recall_fscore_support(
+        true_labels, predicted_labels, average='macro'
+    )
+
+    # Metrics cho từng lớp
+    precision_per_class, recall_per_class, f1_per_class, support_per_class = precision_recall_fscore_support(
+        true_labels, predicted_labels, average=None
+    )
+
     # Confusion matrix
     cm = confusion_matrix(true_labels, predicted_labels)
-    
-    # Classification report
+
+    # Classification report chi tiết
     class_report = classification_report(
         true_labels, predicted_labels,
         target_names=['THẬT', 'GIẢ'],
@@ -170,19 +180,42 @@ def evaluate_model(model_path, test_data_path, output_dir="evaluation_results"):
     detailed_df = pd.DataFrame(detailed_results)
     detailed_df.to_csv(f'{output_dir}/detailed_predictions.csv', index=False, encoding='utf-8')
     
-    # Tổng hợp kết quả
+    # Tổng hợp kết quả chi tiết
     evaluation_results = {
         'model_path': model_path,
         'test_data_path': test_data_path,
         'total_samples': len(test_df),
         'correct_predictions': sum(1 for r in detailed_results if r['correct']),
-        'metrics': {
+        'overall_metrics': {
             'accuracy': accuracy,
-            'precision': precision,
-            'recall': recall,
-            'f1_score': f1
+            'f1_weighted': f1_weighted,
+            'f1_macro': f1_macro,
+            'precision_weighted': precision_weighted,
+            'precision_macro': precision_macro,
+            'recall_weighted': recall_weighted,
+            'recall_macro': recall_macro
         },
-        'confusion_matrix': cm.tolist(),
+        'per_class_metrics': {
+            'that_class': {
+                'f1': f1_per_class[0] if len(f1_per_class) > 0 else 0.0,
+                'precision': precision_per_class[0] if len(precision_per_class) > 0 else 0.0,
+                'recall': recall_per_class[0] if len(recall_per_class) > 0 else 0.0,
+                'support': int(support_per_class[0]) if len(support_per_class) > 0 else 0
+            },
+            'gia_class': {
+                'f1': f1_per_class[1] if len(f1_per_class) > 1 else 0.0,
+                'precision': precision_per_class[1] if len(precision_per_class) > 1 else 0.0,
+                'recall': recall_per_class[1] if len(recall_per_class) > 1 else 0.0,
+                'support': int(support_per_class[1]) if len(support_per_class) > 1 else 0
+            }
+        },
+        'confusion_matrix': {
+            'matrix': cm.tolist(),
+            'true_negatives': int(cm[0, 0]) if cm.shape == (2, 2) else 0,
+            'false_positives': int(cm[0, 1]) if cm.shape == (2, 2) else 0,
+            'false_negatives': int(cm[1, 0]) if cm.shape == (2, 2) else 0,
+            'true_positives': int(cm[1, 1]) if cm.shape == (2, 2) else 0
+        },
         'classification_report': class_report,
         'timestamp': datetime.now().isoformat()
     }
@@ -191,15 +224,42 @@ def evaluate_model(model_path, test_data_path, output_dir="evaluation_results"):
     with open(f'{output_dir}/evaluation_summary.json', 'w', encoding='utf-8') as f:
         json.dump(evaluation_results, f, ensure_ascii=False, indent=2)
     
-    # In kết quả
+    # In kết quả chi tiết
     logger.info("=== EVALUATION RESULTS ===")
     logger.info(f"Total samples: {len(test_df)}")
     logger.info(f"Correct predictions: {evaluation_results['correct_predictions']}")
+    logger.info("")
+    logger.info("=== OVERALL METRICS ===")
     logger.info(f"Accuracy: {accuracy:.4f}")
-    logger.info(f"Precision: {precision:.4f}")
-    logger.info(f"Recall: {recall:.4f}")
-    logger.info(f"F1-score: {f1:.4f}")
+    logger.info(f"F1 (weighted): {f1_weighted:.4f}")
+    logger.info(f"F1 (macro): {f1_macro:.4f}")
+    logger.info(f"Precision (weighted): {precision_weighted:.4f}")
+    logger.info(f"Precision (macro): {precision_macro:.4f}")
+    logger.info(f"Recall (weighted): {recall_weighted:.4f}")
+    logger.info(f"Recall (macro): {recall_macro:.4f}")
+    logger.info("")
+    logger.info("=== PER-CLASS METRICS ===")
+    logger.info("Class THẬT (0):")
+    logger.info(f"  F1: {evaluation_results['per_class_metrics']['that_class']['f1']:.4f}")
+    logger.info(f"  Precision: {evaluation_results['per_class_metrics']['that_class']['precision']:.4f}")
+    logger.info(f"  Recall: {evaluation_results['per_class_metrics']['that_class']['recall']:.4f}")
+    logger.info(f"  Support: {evaluation_results['per_class_metrics']['that_class']['support']}")
+    logger.info("")
+    logger.info("Class GIẢ (1):")
+    logger.info(f"  F1: {evaluation_results['per_class_metrics']['gia_class']['f1']:.4f}")
+    logger.info(f"  Precision: {evaluation_results['per_class_metrics']['gia_class']['precision']:.4f}")
+    logger.info(f"  Recall: {evaluation_results['per_class_metrics']['gia_class']['recall']:.4f}")
+    logger.info(f"  Support: {evaluation_results['per_class_metrics']['gia_class']['support']}")
+    logger.info("")
+    logger.info("=== CONFUSION MATRIX ===")
+    logger.info("                 Predicted")
+    logger.info("                THẬT   GIẢ")
+    logger.info(f"Actual THẬT    {evaluation_results['confusion_matrix']['true_negatives']:4d}  {evaluation_results['confusion_matrix']['false_positives']:4d}")
+    logger.info(f"       GIẢ     {evaluation_results['confusion_matrix']['false_negatives']:4d}  {evaluation_results['confusion_matrix']['true_positives']:4d}")
+    logger.info("")
     logger.info(f"Results saved to: {output_dir}")
+    logger.info(f"  - Detailed predictions: {output_dir}/detailed_predictions.csv")
+    logger.info(f"  - Evaluation summary: {output_dir}/evaluation_summary.json")
     
     return evaluation_results
 

@@ -47,7 +47,11 @@ python train_phobert_fake_news.py
 
 #### Đánh giá model
 ```bash
+# Đánh giá cơ bản
 python inference_phobert.py --mode evaluate
+
+# Tạo báo cáo đánh giá chi tiết với biểu đồ
+python create_evaluation_report.py
 ```
 
 #### Demo tương tác
@@ -61,6 +65,7 @@ python inference_phobert.py --mode demo
 ├── prepare_data_for_phobert.py     # Script chuyển đổi dữ liệu
 ├── train_phobert_fake_news.py      # Script training PhoBERT
 ├── inference_phobert.py            # Script inference và evaluation
+├── create_evaluation_report.py     # Script tạo báo cáo đánh giá chi tiết
 ├── run_phobert_pipeline.py         # Script chạy toàn bộ pipeline
 ├── requirements_phobert.txt        # Dependencies cho PhoBERT
 ├── README_PhoBERT.md              # Hướng dẫn này
@@ -74,14 +79,19 @@ python inference_phobert.py --mode demo
 │   ├── tokenizer_config.json
 │   └── ...
 └── evaluation_results/            # Kết quả đánh giá
-    ├── detailed_predictions.csv
-    └── evaluation_summary.json
+    ├── detailed_predictions.csv      # Dự đoán chi tiết cho từng mẫu
+    ├── evaluation_summary.json       # Tổng hợp metrics
+    ├── evaluation_report.html        # Báo cáo HTML tương tác
+    ├── confusion_matrix.png          # Biểu đồ confusion matrix
+    ├── per_class_metrics.png         # Biểu đồ metrics theo lớp
+    ├── overall_metrics.png           # Biểu đồ metrics tổng thể
+    └── class_distribution.png        # Biểu đồ phân bố lớp
 ```
 
 ## ⚙️ Cấu hình Training
 
 - **Model**: vinai/phobert-base
-- **Max Length**: 512 tokens
+- **Max Length**: 256 tokens
 - **Batch Size**: 16
 - **Learning Rate**: 2e-5
 - **Epochs**: 3
@@ -127,7 +137,7 @@ Chỉnh sửa các tham số trong `train_phobert_fake_news.py`:
 ```python
 # Cấu hình
 MODEL_NAME = "vinai/phobert-base"  # Có thể thay bằng phobert-large
-MAX_LENGTH = 512                   # Tăng nếu cần xử lý text dài hơn
+MAX_LENGTH = 256                   # Tối đa 256 tokens cho PhoBERT
 BATCH_SIZE = 16                    # Giảm nếu thiếu GPU memory
 LEARNING_RATE = 2e-5               # Điều chỉnh learning rate
 NUM_EPOCHS = 3                     # Tăng số epochs nếu cần
@@ -141,6 +151,34 @@ MODEL_NAME = "vinai/phobert-large"  # Sử dụng PhoBERT large
 ```
 
 ## 📊 Kết quả Đánh giá
+
+### Metrics Chi tiết
+
+Model được đánh giá với các metrics sau:
+
+**Metrics Tổng thể:**
+- **Accuracy**: Tỷ lệ dự đoán đúng tổng thể
+- **F1 (Weighted)**: F1-score có trọng số theo số lượng mẫu của từng lớp
+- **F1 (Macro)**: F1-score trung bình không có trọng số
+- **Precision/Recall (Weighted & Macro)**: Tương tự cho precision và recall
+
+**Metrics Theo Lớp:**
+- **Lớp THẬT (0)**: F1, Precision, Recall, Support cho tin thật
+- **Lớp GIẢ (1)**: F1, Precision, Recall, Support cho tin giả
+
+**Confusion Matrix:**
+- **True Negatives**: Dự đoán đúng tin thật
+- **False Positives**: Dự đoán sai tin thật thành tin giả
+- **False Negatives**: Dự đoán sai tin giả thành tin thật
+- **True Positives**: Dự đoán đúng tin giả
+
+### Báo cáo Trực quan
+
+Sau khi chạy đánh giá, bạn sẽ có:
+1. **evaluation_report.html**: Báo cáo HTML tương tác với tất cả biểu đồ
+2. **Biểu đồ PNG**: Các biểu đồ riêng lẻ để sử dụng trong báo cáo khác
+
+## 📈 Kết quả Mẫu
 
 Sau khi training, kết quả đánh giá sẽ được lưu trong:
 - `evaluation_results/evaluation_summary.json`: Tổng hợp metrics
