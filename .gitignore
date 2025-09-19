@@ -1,5 +1,6 @@
 # Model files and checkpoints
 gpt-oss-20b-qlora-finetune-v2/
+phobert-fake-news-detector/
 *.safetensors
 *.bin
 checkpoint-*/
@@ -66,5 +67,8 @@ transformers_cache/
 # Results and outputs
 results/
 outputs/
+evaluation_results/
 my_results.csv
 evaluation_summary.json
+detailed_predictions.csv
+training_results.json
