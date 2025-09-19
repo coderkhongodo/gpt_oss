@@ -1,0 +1,77 @@
+{
+  "model_name": "vinai/phobert-base",
+  "training_args": {
+    "max_length": 256,
+    "batch_size": 16,
+    "learning_rate": 2e-05,
+    "num_epochs": 3,
+    "warmup_steps": 500,
+    "weight_decay": 0.01
+  },
+  "train_results": {
+    "train_loss": 0.16141265450611644,
+    "train_runtime": 599.9106,
+    "train_samples_per_second": 72.606
+  },
+  "test_results": {
+    "overall_metrics": {
+      "accuracy": 0.9506172839506173,
+      "f1_weighted": 0.9498616376253506,
+      "f1_macro": 0.9093086181693777,
+      "precision_weighted": 0.9496069668299022,
+      "precision_macro": 0.9224967907573812,
+      "recall_weighted": 0.9506172839506173,
+      "recall_macro": 0.8973979715044675
+    },
+    "per_class_metrics": {
+      "that_class": {
+        "f1": 0.9705159705159705,
+        "precision": 0.9634146341463414,
+        "recall": 0.9777227722772277,
+        "support": 404
+      },
+      "gia_class": {
+        "f1": 0.8481012658227848,
+        "precision": 0.881578947368421,
+        "recall": 0.8170731707317073,
+        "support": 82
+      }
+    },
+    "confusion_matrix": {
+      "true_negatives": 395,
+      "false_positives": 9,
+      "false_negatives": 15,
+      "true_positives": 67
+    },
+    "raw_results": {
+      "eval_loss": 0.27443447709083557,
+      "eval_accuracy": 0.9506172839506173,
+      "eval_f1_weighted": 0.9498616376253506,
+      "eval_precision_weighted": 0.9496069668299022,
+      "eval_recall_weighted": 0.9506172839506173,
+      "eval_f1_macro": 0.9093086181693777,
+      "eval_precision_macro": 0.9224967907573812,
+      "eval_recall_macro": 0.8973979715044675,
+      "eval_f1_that": 0.9705159705159705,
+      "eval_precision_that": 0.9634146341463414,
+      "eval_recall_that": 0.9777227722772277,
+      "eval_support_that": 404,
+      "eval_f1_gia": 0.8481012658227848,
+      "eval_precision_gia": 0.881578947368421,
+      "eval_recall_gia": 0.8170731707317073,
+      "eval_support_gia": 82,
+      "eval_true_negatives": 395,
+      "eval_false_positives": 9,
+      "eval_false_negatives": 15,
+      "eval_true_positives": 67,
+      "eval_f1": 0.9498616376253506,
+      "eval_precision": 0.9496069668299022,
+      "eval_recall": 0.9506172839506173,
+      "eval_runtime": 2.242,
+      "eval_samples_per_second": 216.77,
+      "eval_steps_per_second": 13.827,
+      "epoch": 3.0
+    }
+  },
+  "timestamp": "2025-09-19T11:29:31.581658"
+}
